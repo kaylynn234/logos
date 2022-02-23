@@ -122,7 +122,7 @@
 //! ```
 //!
 //! Callbacks can return any value implementing the [CallbackResult][crate::callback::CallbackResult] trait. This trait is implemented already for `Option`,
-//! `Result`, `bool` and many more - see the [documentation on callbacks][./index.html] for more information.
+//! `Result`, `bool` and many more - see the [documentation on callbacks](./callback/index.html) for more information.
 //!
 //! ## Token disambiguation
 //!
