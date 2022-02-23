@@ -1,15 +1,15 @@
 [package]
 name = "logos-derive"
-version = "0.12.0"
+version = "0.13.0"
 authors = ["Maciej Hirsz <hello@maciej.codes>"]
 license = "MIT OR Apache-2.0"
 description = "Create ridiculously fast Lexers"
-repository = "https://github.com/maciejhirsz/logos"
+repository = "https://github.com/kaylynn234/logos"
 documentation = "https://docs.rs/logos-derive"
 keywords = ["lexer", "lexical", "tokenizer", "parser", "no_std"]
 categories = ["parsing", "text-processing"]
 readme = "../README.md"
-edition = "2018"
+edition = "2021"
 
 [lib]
 name = "logos_derive"

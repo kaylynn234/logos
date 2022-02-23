@@ -6,11 +6,17 @@ use std::ops::Range;
 
 mod binary;
 
-pub fn assert_lex<'a, Token>(
-    source: &'a Token::Source,
-    tokens: &[(Token, &'a <Token::Source as Source>::Slice, Range<usize>)],
-) where
+type TestCase<'a, Token> = (
+    Result<Token, <Token as Logos<'a>>::Error>,
+    &'a <<Token as Logos<'a>>::Source as Source>::Slice,
+    Range<usize>,
+);
+
+#[track_caller]
+pub fn assert_lex<'a, Token>(source: &'a Token::Source, tokens: &[TestCase<'a, Token>])
+where
     Token: Logos<'a> + fmt::Debug + PartialEq,
+    Token::Error: fmt::Debug + PartialEq,
     Token::Extras: Default,
 {
     let mut lex = Token::lexer(source);

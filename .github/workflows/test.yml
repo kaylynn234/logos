@@ -20,6 +20,26 @@ jobs:
           command: fmt
           args: -- --check
 
+  no-std:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - name: Install `cargo-nono`
+        run: |
+          curl -LSfs https://japaric.github.io/trust/install.sh | \
+          sh -s -- --git hobofan/cargo-nono
+      - name: Check `no_std` compatibility
+        uses: actions-rs/cargo@v1
+        with:
+          command: nono
+          args: check --no-default-features --package "logos"
+
   tests:
     strategy:
       matrix:

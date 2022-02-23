@@ -1,14 +1,13 @@
 #![feature(test)]
 extern crate test;
 
-use logos_derive::Logos;
+use logos::Logos;
 use test::{black_box, Bencher};
 
 #[derive(Debug, Clone, Copy, PartialEq, Logos)]
 pub enum Token {
     #[regex(r"[ \n\t\f]", logos::skip)]
-    #[error]
-    InvalidToken,
+    Whitespace,
 
     #[regex("[a-zA-Z_$][a-zA-Z0-9_$]*")]
     Identifier,
@@ -126,14 +125,14 @@ fn identifiers(b: &mut Bencher) {
     b.iter(|| {
         let mut lex = Token::lexer(IDENTIFIERS);
 
-        while let Some(token) = lex.next() {
-            black_box(token);
+        for token in lex.by_ref() {
+            let _ = black_box(token);
         }
     });
 }
 
 #[bench]
-fn keywords_operators_and_punctators(b: &mut Bencher) {
+fn keywords_operators_and_punctuators(b: &mut Bencher) {
     use logos::Logos;
 
     b.bytes = SOURCE.len() as u64;
@@ -141,8 +140,8 @@ fn keywords_operators_and_punctators(b: &mut Bencher) {
     b.iter(|| {
         let mut lex = Token::lexer(SOURCE);
 
-        while let Some(token) = lex.next() {
-            black_box(token);
+        for token in lex.by_ref() {
+            let _ = black_box(token);
         }
     });
 }
@@ -156,8 +155,8 @@ fn strings(b: &mut Bencher) {
     b.iter(|| {
         let mut lex = Token::lexer(STRINGS);
 
-        while let Some(token) = lex.next() {
-            black_box(token);
+        for token in lex.by_ref() {
+            let _ = black_box(token);
         }
     });
 }

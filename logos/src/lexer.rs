@@ -1,22 +1,62 @@
-use super::internal::LexerInternal;
-use super::Logos;
-use crate::source::{self, Source};
+use crate::error::Error;
+use crate::iter::MapWithLexer;
+use crate::source::Source;
+use crate::Logos;
 
 use core::fmt::{self, Debug};
 use core::mem::ManuallyDrop;
 
-/// Byte range in the source.
+/// A byte range in the source.
 pub type Span = core::ops::Range<usize>;
 
-/// `Lexer` is the main struct of the crate that allows you to read through a
-/// `Source` and produce tokens for enums implementing the `Logos` trait.
-pub struct Lexer<'source, Token: Logos<'source>> {
-    source: &'source Token::Source,
-    token: ManuallyDrop<Option<Token>>,
-    token_start: usize,
-    token_end: usize,
+// This is basically a slightly less ugly way of writing `fn(Result<Token, Token::Error>, Lexer<'source, Token>) ->
+// Result<(Token, Span), Token::Error>`. It also looks like a cute little type-level function.
+//
+// Being forced to disambiguate associated types truly is of the Devil.
+type ErrorOf<'s, T> = <T as Logos<'s>>::Error;
+type ResultOf<'s, T, U> = Result<U, ErrorOf<'s, T>>;
+type SpanFn<'s, T> = fn(ResultOf<'s, T, T>, &Lexer<'s, T>) -> ResultOf<'s, T, (T, Span)>;
 
-    /// Extras associated with the `Token`.
+/// A `Lexer` allows you to read through a source (a type implementing the [Source] trait, like a string
+/// slice) and produce tokens using the [Logos] trait. It's important to note that you should *not* implement [Logos]
+/// yourself, and should always use the derive macro instead. See the [trait's documentation][Logos] for more details.
+///
+/// # Example
+/// ```
+/// use logos::{Logos, UnknownToken};
+///
+/// #[derive(Logos, Debug, PartialEq)]
+/// enum Example {
+///     #[regex(r"[ \n\t\f]+", logos::skip)]
+///     Whitespace,
+///
+///     #[regex("-?[0-9]+", |lex| lex.slice().parse().ok())]
+///     Integer(i64),
+///
+///     #[regex(r"-?[0-9]+\.[0-9]+", |lex| lex.slice().parse().ok())]
+///     Float(f64),
+/// }
+///
+/// let tokens: Vec<_> = Example::lexer("108 9 3.5 4.2 a").collect();
+///
+/// assert_eq! {
+///     tokens,
+///     &[
+///         Ok(Example::Integer(108)),
+///         Ok(Example::Integer(9)),
+///         Ok(Example::Float(3.5)),
+///         Ok(Example::Float(4.2)),
+///         Err(UnknownToken), // We don't recognise this token!
+///     ]
+/// }
+/// ```
+pub struct Lexer<'source, Token: Logos<'source>> {
+    pub(crate) source: &'source Token::Source,
+    pub(crate) token: ManuallyDrop<Option<Result<Token, Token::Error>>>,
+    pub(crate) token_start: usize,
+    pub(crate) token_end: usize,
+
+    /// The "extras" associated with `Token`.
     pub extras: Token::Extras,
 }
 
@@ -37,8 +77,8 @@ where
 impl<'source, Token: Logos<'source>> Lexer<'source, Token> {
     /// Create a new `Lexer`.
     ///
-    /// Due to type inference, it might be more ergonomic to construct
-    /// it by calling [`Token::lexer`](./trait.Logos.html#method.lexer) on any `Token` with derived `Logos`.
+    /// Because of type inference, it can be more convenient to use the [Logos::lexer] function from the [Logos] trait
+    /// instead.
     pub fn new(source: &'source Token::Source) -> Self
     where
         Token::Extras: Default,
@@ -46,10 +86,15 @@ impl<'source, Token: Logos<'source>> Lexer<'source, Token> {
         Self::with_extras(source, Default::default())
     }
 
-    /// Create a new `Lexer` with the provided `Extras`.
+    /// Create a new `Lexer` with the provided extras.
     ///
-    /// Due to type inference, it might be more ergonomic to construct
-    /// it by calling [`Token::lexer_with_extras`](./trait.Logos.html#method.lexer_with_extras) on any `Token` with derived `Logos`.
+    /// Because of type inference, it can be more convenient to use the [Logos::lexer_with_extras] function from the
+    /// [Logos] trait instead.
+    ///
+    /// # Note
+    ///
+    /// In most cases, you can use [Lexer::new] instead. You should only use this function if you need to set up your
+    /// lexer in a way that doesn't play nicely with the [Default] trait.
     pub fn with_extras(source: &'source Token::Source, extras: Token::Extras) -> Self {
         Lexer {
             source,
@@ -60,30 +105,32 @@ impl<'source, Token: Logos<'source>> Lexer<'source, Token> {
         }
     }
 
-    /// Source from which this Lexer is reading tokens.
-    #[inline]
-    pub fn source(&self) -> &'source Token::Source {
-        self.source
-    }
-
-    /// Wrap the `Lexer` in an [`Iterator`](https://doc.rust-lang.org/std/iter/trait.Iterator.html)
-    /// that produces tuples of `(Token, `[`Span`](./type.Span.html)`)`.
+    /// Wrap the lexer in an [Iterator] that pairs tokens with their source positions.
+    ///
+    /// The iterator produces `Result<(Token, Span), Token::Error>` values.
+    ///
+    /// # Note
+    ///
+    /// This method is a shorthand for using [LexerExt::map_with_lexer] and a callback that returns (`Token`, [Span])
+    /// tuples. If you'd like to use a different span type, or wish to perform any other sort of processing, you should
+    /// use the [LexerExt::map_with_lexer] method directly.
+    ///
+    /// [LexerExt::map_with_lexer]: crate::LexerExt::map_with_lexer
     ///
     /// # Example
     ///
     /// ```
-    /// use logos::Logos;
+    /// use logos::{Logos, UnknownToken};
     ///
     /// #[derive(Logos, Debug, PartialEq)]
     /// enum Example {
     ///     #[regex(r"[ \n\t\f]+", logos::skip)]
-    ///     #[error]
-    ///     Error,
+    ///     Whitespace,
     ///
-    ///     #[regex("-?[0-9]+", |lex| lex.slice().parse())]
+    ///     #[regex("-?[0-9]+", |lex| lex.slice().parse().ok())]
     ///     Integer(i64),
     ///
-    ///     #[regex("-?[0-9]+\\.[0-9]+", |lex| lex.slice().parse())]
+    ///     #[regex("-?[0-9]+\\.[0-9]+", |lex| lex.slice().parse().ok())]
     ///     Float(f64),
     /// }
     ///
@@ -92,16 +139,18 @@ impl<'source, Token: Logos<'source>> Lexer<'source, Token> {
     /// assert_eq!(
     ///     tokens,
     ///     &[
-    ///         (Example::Integer(42), 0..2),
-    ///         (Example::Float(3.14), 3..7),
-    ///         (Example::Integer(-5), 8..10),
-    ///         (Example::Error, 11..12), // 'f' is not a recognized token
+    ///         Ok((Example::Integer(42), 0..2)),
+    ///         Ok((Example::Float(3.14), 3..7)),
+    ///         Ok((Example::Integer(-5), 8..10)),
+    ///         Err(UnknownToken), // 'f' is not a recognized token
     ///     ],
     /// );
     /// ```
     #[inline]
-    pub fn spanned(self) -> SpannedIter<'source, Token> {
-        SpannedIter { lexer: self }
+    pub fn spanned(self) -> MapWithLexer<'source, Self, SpanFn<'source, Token>> {
+        use crate::LexerExt;
+
+        self.map_with_lexer(|result, lexer| result.map(|token| (token, lexer.span())))
     }
 
     #[inline]
@@ -111,19 +160,29 @@ impl<'source, Token: Logos<'source>> Lexer<'source, Token> {
         self.span()
     }
 
-    /// Get the range for the current token in `Source`.
+    /// The source position of the current token.
     #[inline]
     pub fn span(&self) -> Span {
         self.token_start..self.token_end
     }
 
-    /// Get a string slice of the current token.
+    /// The source that tokens are being read from. The return type of this method is determined by [Logos::Source], and
+    /// will be [&str][str] for most lexers.
+    #[inline]
+    pub fn source(&self) -> &'source Token::Source {
+        self.source
+    }
+
+    /// A slice containing the current token. The return type of this method is determined by [Logos::Source], and will
+    /// be [&str][str] for most lexers.
     #[inline]
     pub fn slice(&self) -> &'source <Token::Source as Source>::Slice {
         unsafe { self.source.slice_unchecked(self.span()) }
     }
 
-    /// Get a slice of remaining source, starting at the end of current token.
+    /// A slice containing the remaining source. This is similar to [Lexer::source], but starts  at the end of the
+    /// current token. The return type of this method is determined by [Logos::Source], and will be [&str][str] for
+    /// most lexers.
     #[inline]
     pub fn remainder(&self) -> &'source <Token::Source as Source>::Slice {
         unsafe {
@@ -132,10 +191,19 @@ impl<'source, Token: Logos<'source>> Lexer<'source, Token> {
         }
     }
 
+    /// Create a new error value representing a generic "unknown token" error.
+    ///
+    /// This is a convenience method intended for use within lexer callbacks. You can customise the behaviour of this
+    /// method using the [Error] trait and the `error` option in the [Logos] derive macro. See its documentation for
+    /// more information.
+    #[inline]
+    pub fn error(&self) -> Token::Error {
+        Token::Error::unknown_token(self)
+    }
+
     /// Turn this lexer into a lexer for a new token type.
     ///
-    /// The new lexer continues to point at the same span as the current lexer,
-    /// and the current token becomes the error token of the new token type.
+    /// The new lexer points at the same span as this one, but the current token will be replaced with an error.
     pub fn morph<Token2>(self) -> Lexer<'source, Token2>
     where
         Token2: Logos<'source, Source = Token::Source>,
@@ -150,18 +218,24 @@ impl<'source, Token: Logos<'source>> Lexer<'source, Token> {
         }
     }
 
-    /// Bumps the end of currently lexed token by `n` bytes.
+    /// Bump the current span by `n` bytes.
     ///
     /// # Panics
     ///
-    /// Panics if adding `n` to current offset would place the `Lexer` beyond the last byte,
-    /// or in the middle of an UTF-8 code point (does not apply when lexing raw `&[u8]`).
+    /// Panics if the new span is beyond the last byte, or breaks any of the source type's other invariants.
+    ///
+    /// As an example, `&str` must always be valid UTF-8 - so when used as a source type, this method will panic if the new
+    /// span would be in the middle of a UTF-8 code point.
+    ///
+    /// However, some types do not have invariants such as these! If using `&[u8]` as a source type, the only
+    /// requirement is that the new span is within bounds.
     pub fn bump(&mut self, n: usize) {
         self.token_end += n;
 
         assert!(
             self.source.is_boundary(self.token_end),
-            "Invalid Lexer bump",
+            "cannot bump to byte {} as it is not a valid index for the source type",
+            self.token_end
         )
     }
 }
@@ -170,6 +244,7 @@ impl<'source, Token> Clone for Lexer<'source, Token>
 where
     Token: Logos<'source> + Clone,
     Token::Extras: Clone,
+    Token::Error: Clone,
 {
     fn clone(&self) -> Self {
         Lexer {
@@ -177,143 +252,5 @@ where
             token: self.token.clone(),
             ..*self
         }
-    }
-}
-
-impl<'source, Token> Iterator for Lexer<'source, Token>
-where
-    Token: Logos<'source>,
-{
-    type Item = Token;
-
-    #[inline]
-    fn next(&mut self) -> Option<Token> {
-        self.token_start = self.token_end;
-
-        Token::lex(self);
-
-        // This basically treats self.token as a temporary field.
-        // Since we always immediately return a newly set token here,
-        // we don't have to replace it with `None` or manually drop
-        // it later.
-        unsafe { ManuallyDrop::take(&mut self.token) }
-    }
-}
-
-/// Iterator that pairs tokens with their position in the source.
-///
-/// Look at [`Lexer::spanned`](./struct.Lexer.html#method.spanned) for documentation.
-pub struct SpannedIter<'source, Token: Logos<'source>> {
-    lexer: Lexer<'source, Token>,
-}
-
-impl<'source, Token> Iterator for SpannedIter<'source, Token>
-where
-    Token: Logos<'source>,
-{
-    type Item = (Token, Span);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.lexer.next().map(|token| (token, self.lexer.span()))
-    }
-}
-
-#[doc(hidden)]
-/// # WARNING!
-///
-/// **This trait, and it's methods, are not meant to be used outside of the
-/// code produced by `#[derive(Logos)]` macro.**
-impl<'source, Token> LexerInternal<'source> for Lexer<'source, Token>
-where
-    Token: Logos<'source>,
-{
-    type Token = Token;
-
-    /// Read a `Chunk` at current position of the `Lexer`. If end
-    /// of the `Source` has been reached, this will return `0`.
-    #[inline]
-    fn read<Chunk>(&self) -> Option<Chunk>
-    where
-        Chunk: source::Chunk<'source>,
-    {
-        self.source.read(self.token_end)
-    }
-
-    /// Read a `Chunk` at a position offset by `n`.
-    #[inline]
-    fn read_at<Chunk>(&self, n: usize) -> Option<Chunk>
-    where
-        Chunk: source::Chunk<'source>,
-    {
-        self.source.read(self.token_end + n)
-    }
-
-    #[inline]
-    unsafe fn read_unchecked<Chunk>(&self, n: usize) -> Chunk
-    where
-        Chunk: source::Chunk<'source>,
-    {
-        self.source.read_unchecked(self.token_end + n)
-    }
-
-    /// Test a chunk at current position with a closure.
-    #[inline]
-    fn test<T, F>(&self, test: F) -> bool
-    where
-        T: source::Chunk<'source>,
-        F: FnOnce(T) -> bool,
-    {
-        match self.source.read::<T>(self.token_end) {
-            Some(chunk) => test(chunk),
-            None => false,
-        }
-    }
-
-    /// Test a chunk at current position offset by `n` with a closure.
-    #[inline]
-    fn test_at<T, F>(&self, n: usize, test: F) -> bool
-    where
-        T: source::Chunk<'source>,
-        F: FnOnce(T) -> bool,
-    {
-        match self.source.read::<T>(self.token_end + n) {
-            Some(chunk) => test(chunk),
-            None => false,
-        }
-    }
-
-    /// Bump the position `Lexer` is reading from by `size`.
-    #[inline]
-    fn bump_unchecked(&mut self, size: usize) {
-        debug_assert!(
-            self.token_end + size <= self.source.len(),
-            "Bumping out of bounds!"
-        );
-
-        self.token_end += size;
-    }
-
-    /// Reset `token_start` to `token_end`.
-    #[inline]
-    fn trivia(&mut self) {
-        self.token_start = self.token_end;
-    }
-
-    /// Set the current token to appropriate `#[error]` variant.
-    /// Guarantee that `token_end` is at char boundary for `&str`.
-    #[inline]
-    fn error(&mut self) {
-        self.token_end = self.source.find_boundary(self.token_end);
-        self.token = ManuallyDrop::new(Some(Token::ERROR));
-    }
-
-    #[inline]
-    fn end(&mut self) {
-        self.token = ManuallyDrop::new(None);
-    }
-
-    #[inline]
-    fn set(&mut self, token: Token) {
-        self.token = ManuallyDrop::new(Some(token));
     }
 }

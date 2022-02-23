@@ -22,7 +22,10 @@ impl<'a> Generator<'a> {
         match &leaf.callback {
             Some(Callback::Label(callback)) => quote! {
                 #bump
-                #callback(lex).construct(#constructor, lex);
+
+                let result = #callback(lex);
+
+                lex.apply(result, #constructor);
             },
             Some(Callback::Inline(inline)) => {
                 let arg = &inline.arg;
@@ -36,17 +39,19 @@ impl<'a> Generator<'a> {
                         #body
                     }
 
-                    callback(lex).construct(#constructor, lex);
+                    let result = callback(lex);
+
+                    lex.apply(result, #constructor);
                 }
             }
             None if matches!(leaf.field, MaybeVoid::Void) => quote! {
                 #bump
-                lex.set(#name::#ident);
+                lex.set(Ok(#name::#ident));
             },
             None => quote! {
                 #bump
                 let token = #name::#ident(lex.slice());
-                lex.set(token);
+                lex.set(Ok(token));
             },
         }
     }

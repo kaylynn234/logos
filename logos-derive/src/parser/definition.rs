@@ -82,7 +82,6 @@ impl Definition {
                     format!(
                         "\
                         Unknown nested attribute: {}\n\n\
-
                         Expected one of: priority, callback\
                         ",
                         unknown

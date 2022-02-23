@@ -24,8 +24,10 @@ use self::type_params::{replace_lifetime, traverse_type, TypeParams};
 pub struct Parser {
     pub errors: Errors,
     pub mode: Mode,
+    pub source_type: Option<TokenStream>,
     pub extras: MaybeVoid,
     pub subpatterns: Subpatterns,
+    pub error_type: Option<TokenStream>,
     types: TypeParams,
 }
 
@@ -93,6 +95,28 @@ impl Parser {
             };
 
             match (name.to_string().as_str(), value) {
+                ("source", NestedValue::Assign(value)) => {
+                    let span = value.span();
+
+                    if let Some(previous) = self.source_type.replace(value) {
+                        self.err("The source type can only be defined only once", span)
+                            .err("Previous definition here", previous.span());
+                    }
+                }
+                ("source", _) => {
+                    self.err("Expected: source = SomeType", name.span());
+                }
+                ("error", NestedValue::Assign(value)) => {
+                    let span = value.span();
+
+                    if let Some(previous) = self.error_type.replace(value) {
+                        self.err("The error type can only be defined only once", span)
+                            .err("Previous definition here", previous.span());
+                    }
+                }
+                ("error", _) => {
+                    self.err("Expected: error = SomeType", name.span());
+                }
                 ("extras", NestedValue::Assign(value)) => {
                     let span = value.span();
 
@@ -115,7 +139,6 @@ impl Parser {
                     self.err(
                         "\
                         trivia are no longer supported.\n\n\
-
                         For help with migration see release notes: \
                         https://github.com/maciejhirsz/logos/releases\
                         ",
@@ -179,7 +202,6 @@ impl Parser {
                         self.err(
                             "\
                             Expected a named argument at this position\n\n\
-
                             hint: If you are trying to define a callback here use: callback = ...\
                             ",
                             tokens.span(),

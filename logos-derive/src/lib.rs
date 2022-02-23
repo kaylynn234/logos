@@ -23,7 +23,6 @@ use parser::{Mode, Parser};
 use util::MaybeVoid;
 
 use proc_macro::TokenStream;
-use proc_macro2::Span;
 use quote::quote;
 use syn::spanned::Spanned;
 use syn::{Fields, ItemEnum};
@@ -34,7 +33,6 @@ pub fn logos(input: TokenStream) -> TokenStream {
 
     let name = &item.ident;
 
-    let mut error = None;
     let mut parser = Parser::default();
 
     for param in item.generics.params {
@@ -49,7 +47,6 @@ pub fn logos(input: TokenStream) -> TokenStream {
             parser.err(
                 "\
                 #[extras] attribute is deprecated. Use #[logos(extras = Type)] instead.\n\n\
-
                 For help with migration see release notes: \
                 https://github.com/maciejhirsz/logos/releases\
                 ",
@@ -104,19 +101,21 @@ pub fn logos(input: TokenStream) -> TokenStream {
 
             match attr_name.as_str() {
                 "error" => {
-                    let span = variant.ident.span();
-                    if let Some(previous) = error.replace(&variant.ident) {
-                        parser
-                            .err("Only one #[error] variant can be declared.", span)
-                            .err("Previously declared #[error]:", previous.span());
-                    }
+                    // TODO: Remove in future versions
+                    parser.err(
+                        "\
+                        Since 0.13, tokens no longer require an #[error] variant.\n\n\
+                        For help with migration see release notes: \
+                        https://github.com/maciejhirsz/logos/releases\
+                        ",
+                        attr.span(),
+                    );
                 }
                 "end" => {
                     // TODO: Remove in future versions
                     parser.err(
                         "\
-                        Since 0.11 Logos no longer requires the #[end] variant.\n\n\
-
+                        Since 0.11, tokens no longer require the #[end] variant.\n\n\
                         For help with migration see release notes: \
                         https://github.com/maciejhirsz/logos/releases\
                         ",
@@ -199,17 +198,17 @@ pub fn logos(input: TokenStream) -> TokenStream {
     let mut root = Fork::new();
 
     let extras = parser.extras.take();
-    let source = match parser.mode {
-        Mode::Utf8 => quote!(str),
-        Mode::Binary => quote!([u8]),
-    };
+    let source = parser
+        .source_type
+        .take()
+        .unwrap_or_else(|| match parser.mode {
+            Mode::Utf8 => quote!(str),
+            Mode::Binary => quote!([u8]),
+        });
 
-    let error_def = match error {
-        Some(error) => Some(quote!(const ERROR: Self = #name::#error;)),
-        None => {
-            parser.err("missing #[error] token variant.", Span::call_site());
-            None
-        }
+    let error = match parser.error_type.take() {
+        Some(error) => quote!(#error),
+        None => quote!(::logos::UnknownToken),
     };
 
     let generics = parser.generics();
@@ -217,12 +216,14 @@ pub fn logos(input: TokenStream) -> TokenStream {
 
     let impl_logos = |body| {
         quote! {
+            #[automatically_derived]
+            #[allow(unused_braces)]
             impl<'s> ::logos::Logos<'s> for #this {
                 type Extras = #extras;
 
                 type Source = #source;
 
-                #error_def
+                type Error = #error;
 
                 fn lex(lex: &mut ::logos::Lexer<'s, Self>) {
                     #body
@@ -259,7 +260,6 @@ pub fn logos(input: TokenStream) -> TokenStream {
                 format!(
                     "\
                     A definition of variant `{0}` can match the same input as another definition of variant `{1}`.\n\n\
-
                     hint: Consider giving one definition a higher priority: \
                     #[regex(..., priority = {2})]\
                     ",
@@ -289,7 +289,8 @@ pub fn logos(input: TokenStream) -> TokenStream {
 
     let body = generator.generate();
     let tokens = impl_logos(quote! {
-        use ::logos::internal::{LexerInternal, CallbackResult};
+        use ::logos::internal::LexerInternal;
+        use ::logos::callback::CallbackResult;
 
         type Lexer<'s> = ::logos::Lexer<'s, #this>;
 

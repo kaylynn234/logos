@@ -3,9 +3,8 @@ name = "tests"
 version = "0.0.0"
 authors = ["Maciej Hirsz <hello@maciej.codes>"]
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/maciejhirsz/logos"
-edition = "2018"
+repository = "https://github.com/kaylynn234/logos"
+edition = "2021"
 
 [dependencies]
-logos = { path = "../logos", default-features = false, features = ["std"] }
-logos-derive = { path = "../logos-derive" }
+logos = { path = "../logos" }

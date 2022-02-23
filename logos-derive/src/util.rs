@@ -62,7 +62,7 @@ pub fn is_punct(tt: &TokenTree, expect: char) -> bool {
 
 /// If supplied `tt` is a punct matching a char, returns `None`, else returns `tt`
 pub fn expect_punct(tt: Option<TokenTree>, expect: char) -> Option<TokenTree> {
-    tt.filter(|tt| !is_punct(&tt, expect))
+    tt.filter(|tt| !is_punct(tt, expect))
 }
 
 pub trait ToIdent {

@@ -102,6 +102,8 @@ impl<'a> Generator<'a> {
         self.rendered.append_all(out);
     }
 
+    // Applying the suggested fix produces an error due to overlapping mutable borrows, so it's best to silence this lint.
+    #[allow(clippy::map_entry)]
     fn goto(&mut self, id: NodeId, mut ctx: Context) -> &TokenStream {
         let key = (id, ctx);
 

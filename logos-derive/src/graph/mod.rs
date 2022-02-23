@@ -87,7 +87,7 @@ impl ReservedId {
 }
 
 /// Merge key used to lookup whether two nodes have been previously
-/// mered, so we can avoid duplicating merges, potentially running into
+/// merged, so we can avoid duplicating merges, potentially running into
 /// loops that blow out the stack.
 ///
 /// `Merge::new(a, b)` should always equal to `Merge::new(b, a)` to ensure
@@ -265,7 +265,6 @@ impl<Leaf> Graph<Leaf> {
             (None, None) => {
                 panic!(
                     "Merging two reserved nodes! This is a bug, please report it:\
-
                     https://github.com/maciejhirsz/logos/issues"
                 );
             }
@@ -454,7 +453,6 @@ impl<Leaf> Index<NodeId> for Graph<Leaf> {
     fn index(&self, id: NodeId) -> &Node<Leaf> {
         self.get(id).expect(
             "Indexing into an empty node. This is a bug, please report it at:\n\n\
-
             https://github.com/maciejhirsz/logos/issues",
         )
     }
@@ -516,6 +514,7 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     #[test]
+    #[allow(clippy::assertions_on_constants)]
     fn leaf_stack_size() {
         use std::mem::size_of;
 

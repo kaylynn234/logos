@@ -11,9 +11,7 @@
 //!     NonUtf8,
 //! }
 //!
-//! fn main() {
-//!     Token::lexer("This shouldn't work with a string literal!");
-//! }
+//! Token::lexer("This shouldn't work with a string literal!");
 //! ```
 //! Same, but with regex:
 //!
@@ -30,20 +28,14 @@
 //!     NonUtf8,
 //! }
 //!
-//! fn main() {
-//!     Token::lexer("This shouldn't work with a string literal!");
-//! }
+//! Token::lexer("This shouldn't work with a string literal!");
 //! ```
 
 pub use super::assert_lex;
-
-use logos_derive::Logos;
+use logos::Logos;
 
 #[derive(Logos, Debug, Clone, Copy, PartialEq)]
 enum Token {
-    #[error]
-    Error,
-
     #[token("foo")]
     Foo,
 
@@ -62,21 +54,23 @@ enum Token {
 
 #[test]
 fn handles_non_utf8() {
+    use logos::UnknownToken;
+
     assert_lex(
         &[
             0, 0, 0xCA, 0xFE, 0xBE, 0xEF, b'f', b'o', b'o', 0x42, 0x42, 0x42, 0xAA, 0xAA, 0xA2,
             0xAE, 0x10, 0x20, 0,
         ][..],
         &[
-            (Token::Zero, &[0], 0..1),
-            (Token::Zero, &[0], 1..2),
-            (Token::CafeBeef, &[0xCA, 0xFE, 0xBE, 0xEF], 2..6),
-            (Token::Foo, b"foo", 6..9),
-            (Token::Life, &[0x42, 0x42, 0x42], 9..12),
-            (Token::Aaaaaaa, &[0xAA, 0xAA, 0xA2, 0xAE], 12..16),
-            (Token::Error, &[0x10], 16..17),
-            (Token::Error, &[0x20], 17..18),
-            (Token::Zero, &[0], 18..19),
+            (Ok(Token::Zero), &[0], 0..1),
+            (Ok(Token::Zero), &[0], 1..2),
+            (Ok(Token::CafeBeef), &[0xCA, 0xFE, 0xBE, 0xEF], 2..6),
+            (Ok(Token::Foo), b"foo", 6..9),
+            (Ok(Token::Life), &[0x42, 0x42, 0x42], 9..12),
+            (Ok(Token::Aaaaaaa), &[0xAA, 0xAA, 0xA2, 0xAE], 12..16),
+            (Err(UnknownToken), &[0x10], 16..17),
+            (Err(UnknownToken), &[0x20], 17..18),
+            (Ok(Token::Zero), &[0], 18..19),
         ],
     );
 }

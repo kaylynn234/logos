@@ -1,14 +1,18 @@
-use crate::source::Chunk;
-use crate::{Filter, Lexer, Logos, Skip};
+use std::mem::ManuallyDrop;
 
-/// Trait used by the functions contained in the `Lexicon`.
+use crate::callback::{CallbackResult, Output};
+use crate::source::Chunk;
+use crate::{Error, Lexer, Logos, Source};
+
+/// Trait used by the [Logos] derive macro.
 ///
-/// # WARNING!
+/// # Abandon hope, all ye who enter here
 ///
-/// **This trait, and it's methods, are not meant to be used outside of the
-/// code produced by `#[derive(Logos)]` macro.**
+/// This trait (and its methods) are not meant to be used outside of the code produced by `#[derive(Logos)]` macro. The
+/// functionality here is not covered under any versioning guarantees, and may change at any time!
 pub trait LexerInternal<'source> {
     type Token;
+    type Error;
 
     /// Read a chunk at current position.
     fn read<T: Chunk<'source>>(&self) -> Option<T>;
@@ -31,92 +35,120 @@ pub trait LexerInternal<'source> {
     /// Reset `token_start` to `token_end`.
     fn trivia(&mut self);
 
-    /// Set the current token to appropriate `#[error]` variant.
-    /// Guarantee that `token_end` is at char boundary for `&str`.
+    /// Set the current token to the appropriate error value, and guarantee that `token_end` is valid for the source
+    /// type. In the case of `&str`, we verify that `token_end` is a valid character boundary.
     fn error(&mut self);
 
+    /// Modify lexer state to represent EOF
     fn end(&mut self);
 
-    fn set(&mut self, token: Self::Token);
-}
+    /// Set the lexer's current token to `token`.
+    fn set(&mut self, token: Result<Self::Token, Self::Error>);
 
-pub trait CallbackResult<'s, P, T: Logos<'s>> {
-    fn construct<Constructor>(self, c: Constructor, lex: &mut Lexer<'s, T>)
+    /// Apply the result of a callback, modifying lexer state accordingly.
+    fn apply<C, R, F>(&mut self, result: R, constructor: F)
     where
-        Constructor: Fn(P) -> T;
+        Self::Token: Logos<'source>,
+        R: CallbackResult<'source, C, Self::Token>,
+        F: FnOnce(C) -> Self::Token;
 }
 
-impl<'s, P, T: Logos<'s>> CallbackResult<'s, P, T> for P {
+impl<'source, Token> LexerInternal<'source> for Lexer<'source, Token>
+where
+    Token: Logos<'source>,
+{
+    type Token = Token;
+    type Error = Token::Error;
+
     #[inline]
-    fn construct<Constructor>(self, c: Constructor, lex: &mut Lexer<'s, T>)
+    fn read<C>(&self) -> Option<C>
     where
-        Constructor: Fn(P) -> T,
+        C: Chunk<'source>,
     {
-        lex.set(c(self))
+        self.source.read(self.token_end)
     }
-}
 
-impl<'s, T: Logos<'s>> CallbackResult<'s, (), T> for bool {
     #[inline]
-    fn construct<Constructor>(self, c: Constructor, lex: &mut Lexer<'s, T>)
+    fn read_at<C>(&self, n: usize) -> Option<C>
     where
-        Constructor: Fn(()) -> T,
+        C: Chunk<'source>,
     {
-        match self {
-            true => lex.set(c(())),
-            false => lex.set(T::ERROR),
-        }
+        self.source.read(self.token_end + n)
     }
-}
 
-impl<'s, P, T: Logos<'s>> CallbackResult<'s, P, T> for Option<P> {
     #[inline]
-    fn construct<Constructor>(self, c: Constructor, lex: &mut Lexer<'s, T>)
+    unsafe fn read_unchecked<C>(&self, n: usize) -> C
     where
-        Constructor: Fn(P) -> T,
+        C: Chunk<'source>,
     {
-        match self {
-            Some(product) => lex.set(c(product)),
-            None => lex.set(T::ERROR),
-        }
+        self.source.read_unchecked(self.token_end + n)
     }
-}
 
-impl<'s, P, E, T: Logos<'s>> CallbackResult<'s, P, T> for Result<P, E> {
     #[inline]
-    fn construct<Constructor>(self, c: Constructor, lex: &mut Lexer<'s, T>)
+    fn test<C, F>(&self, test: F) -> bool
     where
-        Constructor: Fn(P) -> T,
+        C: Chunk<'source>,
+        F: FnOnce(C) -> bool,
     {
-        match self {
-            Ok(product) => lex.set(c(product)),
-            Err(_) => lex.set(T::ERROR),
-        }
+        self.source.read::<C>(self.token_end).map_or(false, test)
     }
-}
 
-impl<'s, T: Logos<'s>> CallbackResult<'s, (), T> for Skip {
     #[inline]
-    fn construct<Constructor>(self, _: Constructor, lex: &mut Lexer<'s, T>)
+    fn test_at<C, F>(&self, n: usize, test: F) -> bool
     where
-        Constructor: Fn(()) -> T,
+        C: Chunk<'source>,
+        F: FnOnce(C) -> bool,
     {
-        lex.trivia();
-        T::lex(lex);
+        self.source
+            .read::<C>(self.token_end + n)
+            .map_or(false, test)
     }
-}
 
-impl<'s, P, T: Logos<'s>> CallbackResult<'s, P, T> for Filter<P> {
     #[inline]
-    fn construct<Constructor>(self, c: Constructor, lex: &mut Lexer<'s, T>)
+    fn bump_unchecked(&mut self, size: usize) {
+        debug_assert!(
+            self.token_end + size <= self.source.len(),
+            "Bumping out of bounds!"
+        );
+
+        self.token_end += size;
+    }
+
+    #[inline]
+    fn trivia(&mut self) {
+        self.token_start = self.token_end;
+    }
+
+    #[inline]
+    fn error(&mut self) {
+        self.token_end = self.source.find_boundary(self.token_end);
+        self.set(Err(Token::Error::unknown_token(self)))
+    }
+
+    #[inline]
+    fn end(&mut self) {
+        self.token = ManuallyDrop::new(None);
+    }
+
+    #[inline]
+    fn set(&mut self, token: Result<Token, Token::Error>) {
+        self.token = ManuallyDrop::new(Some(token));
+    }
+
+    #[inline]
+    fn apply<C, R, F>(&mut self, result: R, constructor: F)
     where
-        Constructor: Fn(P) -> T,
+        Self::Token: Logos<'source>,
+        R: CallbackResult<'source, C, Self::Token>,
+        F: FnOnce(C) -> Self::Token,
     {
-        match self {
-            Filter::Emit(product) => lex.set(c(product)),
-            Filter::Skip => {
-                lex.trivia();
-                T::lex(lex);
+        match result.construct(self) {
+            Output::Construct(contents) => self.set(Ok(constructor(contents))),
+            Output::Emit(token) => self.set(Ok(token)),
+            Output::Error(error) => self.set(Err(error)),
+            Output::Skip => {
+                self.trivia();
+                Self::Token::lex(self);
             }
         }
     }

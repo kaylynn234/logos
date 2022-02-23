@@ -4,7 +4,7 @@ use regex_syntax::utf8::Utf8Range;
 
 use std::cmp::{Ord, Ordering};
 
-#[derive(Clone, Copy, PartialOrd, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Range {
     pub start: u8,
     pub end: u8,
@@ -64,6 +64,14 @@ impl Iterator for Range {
     }
 }
 
+// The original implementation of `PartialOrd` for this type was derived, and meant that `PartialOrd` and `Ord` could
+// return differing results.
+impl PartialOrd for Range {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
 impl Ord for Range {
     fn cmp(&self, other: &Self) -> Ordering {
         self.start.cmp(&other.start)
@@ -84,8 +92,10 @@ impl From<ClassUnicodeRange> for Range {
         let start = r.start() as u32;
         let end = r.end() as u32;
 
+        // The maximum valid Unicode codepoint is U+10FFFF. It's a bit of a magic number, but I assume it's here to
+        // allow ranges of the form `x..`, or similar.
         if start >= 128 || end >= 128 && end != 0x0010FFFF {
-            panic!("Casting non-ascii ClassUnicodeRange to Range")
+            panic!("attempt to cast non-ascii ClassUnicodeRange to Range")
         }
 
         Range {
@@ -128,7 +138,7 @@ mod tests {
     }
 
     #[test]
-    fn range_iter_bunds() {
+    fn range_iter_bounds() {
         let byte = Range::from(0xFA..=0xFF);
 
         let collected = byte.take(1000).collect::<Vec<_>>();
