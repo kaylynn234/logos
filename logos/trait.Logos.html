@@ -1,0 +1,337 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Types that can be lexed using [Lexer]."><meta name="keywords" content="rust, rustlang, rust-lang, Logos"><title>Logos in logos - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../dark.css" disabled><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../storage.js"></script><script src="../crates.js"></script><script defer src="../main.js"></script>
+    <noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../favicon.svg"></head><body class="rustdoc trait"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a class="sidebar-logo" href="../logos/index.html"><div class="logo-container"><img src="https:&#x2F;&#x2F;maciej.codes&#x2F;kosz&#x2F;logos.png" alt="logo"></div>
+        </a><h2 class="location">Trait Logos</h2><div class="sidebar-elems"><div class="block items"><h3 class="sidebar-title"><a href="#associated-types">Associated Types</a></h3><div class="sidebar-links"><a href="#associatedtype.Error">Error</a><a href="#associatedtype.Extras">Extras</a><a href="#associatedtype.Source">Source</a></div><h3 class="sidebar-title"><a href="#required-methods">Required Methods</a></h3><div class="sidebar-links"><a href="#tymethod.lex">lex</a></div><h3 class="sidebar-title"><a href="#provided-methods">Provided Methods</a></h3><div class="sidebar-links"><a href="#method.lexer">lexer</a><a href="#method.lexer_with_extras">lexer_with_extras</a></div><h3 class="sidebar-title"><a href="#implementors">Implementors</a></h3></div><h2 class="location">Other items in<br><a href="index.html">logos</a></h2><div id="sidebar-vars" data-name="Logos" data-ty="trait" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../logos/index.html"><img src="https:&#x2F;&#x2F;maciej.codes&#x2F;kosz&#x2F;logos.png" alt="logo"></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><h1 class="fqn"><span class="in-band">Trait <a href="index.html">logos</a>::<wbr><a class="trait" href="#">Logos</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/logos/lib.rs.html#611-663" title="goto source code">[src]</a></span></h1><div class="docblock item-decl"><pre class="rust trait"><code>pub trait Logos&lt;'source&gt;: <a class="trait" href="https://doc.rust-lang.org/1.59.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a> {
+    type <a href="#associatedtype.Extras" class="associatedtype">Extras</a>;
+    type <a href="#associatedtype.Source" class="associatedtype">Source</a>: <a class="trait" href="source/trait.Source.html" title="trait logos::source::Source">Source</a> + ?<a class="trait" href="https://doc.rust-lang.org/1.59.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a> + 'source;
+    type <a href="#associatedtype.Error" class="associatedtype">Error</a>: <a class="trait" href="error/trait.Error.html" title="trait logos::error::Error">Error</a>&lt;'source, Self&gt;;
+    fn <a href="#tymethod.lex" class="fnname">lex</a>(lexer: &amp;mut <a class="struct" href="struct.Lexer.html" title="struct logos::Lexer">Lexer</a>&lt;'source, Self&gt;);
+
+    fn <a href="#method.lexer" class="fnname">lexer</a>(source: &amp;'source Self::<a class="associatedtype" href="trait.Logos.html#associatedtype.Source" title="type logos::Logos::Source">Source</a>) -&gt; <a class="struct" href="struct.Lexer.html" title="struct logos::Lexer">Lexer</a>&lt;'source, Self&gt;<span class="notable-traits"><span class="notable-traits-tooltip">ⓘ<div class="notable-traits-tooltiptext"><span class="docblock"><div class="notable">Notable traits for <a class="struct" href="struct.Lexer.html" title="struct logos::Lexer">Lexer</a>&lt;'source, Token&gt;</div><code class="content"><span class="where fmt-newline">impl&lt;'source, Token&gt; <a class="trait" href="https://doc.rust-lang.org/1.59.0/core/iter/traits/iterator/trait.Iterator.html" title="trait core::iter::traits::iterator::Iterator">Iterator</a> for <a class="struct" href="struct.Lexer.html" title="struct logos::Lexer">Lexer</a>&lt;'source, Token&gt; <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;Token: <a class="trait" href="trait.Logos.html" title="trait logos::Logos">Logos</a>&lt;'source&gt;,&nbsp;</span></span><span class="where fmt-newline">    type <a href="https://doc.rust-lang.org/1.59.0/core/iter/traits/iterator/trait.Iterator.html#associatedtype.Item" class="associatedtype">Item</a> = <a class="enum" href="https://doc.rust-lang.org/1.59.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;Token, Token::<a class="associatedtype" href="trait.Logos.html#associatedtype.Error" title="type logos::Logos::Error">Error</a>&gt;;</span></code></span></div></span></span><br>&nbsp;&nbsp;&nbsp; <span class="where">where<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Self::<a class="associatedtype" href="trait.Logos.html#associatedtype.Extras" title="type logos::Logos::Extras">Extras</a>: <a class="trait" href="https://doc.rust-lang.org/1.59.0/core/default/trait.Default.html" title="trait core::default::Default">Default</a></span>,
+    { ... }
+<div class="item-spacer"></div>    fn <a href="#method.lexer_with_extras" class="fnname">lexer_with_extras</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;source: &amp;'source Self::<a class="associatedtype" href="trait.Logos.html#associatedtype.Source" title="type logos::Logos::Source">Source</a>, <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;extras: Self::<a class="associatedtype" href="trait.Logos.html#associatedtype.Extras" title="type logos::Logos::Extras">Extras</a><br>&nbsp;&nbsp;&nbsp;&nbsp;) -&gt; <a class="struct" href="struct.Lexer.html" title="struct logos::Lexer">Lexer</a>&lt;'source, Self&gt;<span class="notable-traits"><span class="notable-traits-tooltip">ⓘ<div class="notable-traits-tooltiptext"><span class="docblock"><div class="notable">Notable traits for <a class="struct" href="struct.Lexer.html" title="struct logos::Lexer">Lexer</a>&lt;'source, Token&gt;</div><code class="content"><span class="where fmt-newline">impl&lt;'source, Token&gt; <a class="trait" href="https://doc.rust-lang.org/1.59.0/core/iter/traits/iterator/trait.Iterator.html" title="trait core::iter::traits::iterator::Iterator">Iterator</a> for <a class="struct" href="struct.Lexer.html" title="struct logos::Lexer">Lexer</a>&lt;'source, Token&gt; <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;Token: <a class="trait" href="trait.Logos.html" title="trait logos::Logos">Logos</a>&lt;'source&gt;,&nbsp;</span></span><span class="where fmt-newline">    type <a href="https://doc.rust-lang.org/1.59.0/core/iter/traits/iterator/trait.Iterator.html#associatedtype.Item" class="associatedtype">Item</a> = <a class="enum" href="https://doc.rust-lang.org/1.59.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;Token, Token::<a class="associatedtype" href="trait.Logos.html#associatedtype.Error" title="type logos::Logos::Error">Error</a>&gt;;</span></code></span></div></span></span> { ... }
+}</code></pre></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Types that can be lexed using <a href="struct.Lexer.html" title="Lexer">Lexer</a>.</p>
+<p>The section below is quite long, so here’s a handy link to <a href="#associated-types">jump to the rest of the trait
+documentation</a>.</p>
+<h2 id="using-the-derive-macro" class="section-header"><a href="#using-the-derive-macro">Using the derive macro</a></h2>
+<p>The main way to interact with this crate is through <code>#[derive(Logos)]</code> - the <a href="trait.Logos.html" title="Logos">Logos</a> derive macro. The derive macro is
+responsible for generating an implementation of this trait, and it’s what does all the heavy lifting for you. A
+lexer would be useless if you couldn’t tell it <em>what</em> and <em>how</em> to lex, so the derive macro also accepts a healthy
+set of options to configure the generated lexer.</p>
+<h3 id="attributes" class="section-header"><a href="#attributes">Attributes</a></h3>
+<p>The derive macro uses <a href="https://doc.rust-lang.org/reference/attributes.html">attributes</a> to customize the generated
+<a href="trait.Logos.html" title="Logos">Logos</a> implementation. For the purposes of documentation, these are split into two categories:</p>
+<ul>
+<li><strong>Enum attributes</strong>, which are applied to an enum definition</li>
+<li><strong>Variant attributes</strong>, which are applied to an individual enum variant</li>
+</ul>
+<p>It’s important to note that a single enum or enum variant can have multiple attributes applied to it.</p>
+<h3 id="enum-attributes" class="section-header"><a href="#enum-attributes">Enum attributes</a></h3><h4 id="logoserror--sometype" class="section-header"><a href="#logoserror--sometype"><code>#[logos(error = SomeType)]</code></a></h4>
+<p>Sets the <a href="trait.Logos.html#associatedtype.Error" title="Logos::Error">error type</a> for this <a href="trait.Logos.html" title="Logos">Logos</a> implementation.</p>
+<p>Logos will use this type to report lexing errors - namely, encountering an unknown token - but you can also use this
+type within callbacks to emit more detailed errors.</p>
+<p>The error type is <a href="error/struct.UnknownToken.html" title="UnknownToken">UnknownToken</a> by default.</p>
+<p>See the <a href="./callback/index.html">documentation on callbacks</a> for details not covered here.</p>
+<h4 id="logosextras--sometype" class="section-header"><a href="#logosextras--sometype"><code>#[logos(extras = SomeType)]</code></a></h4>
+<p>Sets the <a href="trait.Logos.html#associatedtype.Extras" title="Logos::Extras">extras type</a> for this <a href="trait.Logos.html" title="Logos">Logos</a> implementation.</p>
+<p>The <a href="struct.Lexer.html" title="Lexer">Lexer</a> will store a value of this type in its <code>extras</code> field, and you’re free to modify it as you wish. Because
+callbacks are passed <code>&amp;mut Lexer</code> as an argument, this value can also be accessed and modified within callbacks, so
+it’s useful if you’d like to store additional state within your lexer.</p>
+<p>The extras type is <code>()</code> by default.</p>
+<p>See the documentation on <a href="./callback/index.html">callbacks</a>, the <a href="trait.Logos.html#associatedtype.Extras" title="Logos::Extras">extras type</a> and the <a href="struct.Lexer.html" title="Lexer">Lexer</a> type
+for details not covered here.</p>
+<h4 id="logostype-t--sometype" class="section-header"><a href="#logostype-t--sometype"><code>#[logos(type T = SomeType)]</code></a></h4>
+<p>Specify the concrete type to use for the type parameter <code>T</code>.</p>
+<p>If your lexer contains generic type parameters, Logos will emit an error - it doesn’t know what type should be used
+to fill in those type parameters. As an example, the following snippet fails to compile:</p>
+
+<div class='information'><div class='tooltip compile_fail'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered compile_fail"><code><span class="kw">use</span> <span class="ident">logos</span>::{<span class="ident">Logos</span>, <span class="ident">Lexer</span>};
+
+<span class="comment">// A magical type!</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
+<span class="kw">struct</span> <span class="ident">SuperMagic</span>;
+
+<span class="comment">// A callback that produces a default value for `T`.</span>
+<span class="kw">fn</span> <span class="ident">make_magic</span><span class="op">&lt;</span><span class="lifetime">&#39;source</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">lexer</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Lexer</span><span class="op">&lt;</span><span class="lifetime">&#39;source</span>, <span class="ident">Token</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident">T</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">Default</span> <span class="op">+</span> <span class="lifetime">&#39;source</span>,
+    <span class="ident">Token</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">Logos</span><span class="op">&lt;</span><span class="lifetime">&#39;source</span><span class="op">&gt;</span>
+{
+    <span class="ident">T::default</span>()
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Logos</span>)]</span>
+<span class="kw">enum</span> <span class="ident">Token</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Default</span><span class="op">&gt;</span> {
+    <span class="attribute">#[<span class="ident">token</span>(<span class="string">&quot;magic&quot;</span>, <span class="ident">make_magic</span>)]</span>
+    <span class="ident">Magic</span>(<span class="ident">T</span>)
+}</code></pre></div>
+<p>However, we can use the <code>type</code> option to tell Logos what type <code>T</code> (or any other type parameter) should be:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Logos</span>)]</span>
+<span class="attribute">#[<span class="ident">logos</span>(<span class="kw">type</span> <span class="ident">T</span> <span class="op">=</span> <span class="ident">SuperMagic</span>)]</span> <span class="comment">// This is important!</span>
+<span class="kw">enum</span> <span class="ident">Token</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Default</span><span class="op">&gt;</span> {
+    <span class="attribute">#[<span class="ident">token</span>(<span class="string">&quot;magic&quot;</span>, <span class="ident">make_magic</span>)]</span>
+    <span class="ident">Magic</span>(<span class="ident">T</span>)
+}</code></pre></div>
+<p>At present, the derive macro does not perform <em>generic implementations</em> of the <a href="trait.Logos.html" title="Logos">Logos</a> trait, so you must always
+specify replacements for type parameters. This is likely to change in the future.</p>
+<h4 id="logossubpattern-name--" class="section-header"><a href="#logossubpattern-name--"><code>#[logos(subpattern NAME = &quot;...&quot;)]</code></a></h4>
+<p>Define a subpattern named <code>NAME</code> that can be used within regular expressions.</p>
+<p>Subpatterns allow you to avoid code duplication by factoring out the common parts of a regular expression, and
+additionally help readability by making it possible to “name” a regular expression’s component parts.</p>
+<p>Inside of regular expressions, subpatterns are used by wrapping <code>?&amp;</code> and a <em>subpattern name</em> within parenthesis. For
+example, the expression <code>(?&amp;IDENTIFIER)</code> refers to a subpattern named <code>IDENTIFIER</code>.</p>
+<h3 id="variant-attributes" class="section-header"><a href="#variant-attributes">Variant attributes</a></h3><h4 id="token-and-regex" class="section-header"><a href="#token-and-regex"><code>#[token(...)]</code> and <code>#[regex(...)]</code></a></h4>
+<p>The <code>#[token(...)]</code> and <code>#[regex(...)]</code> attributes are used to add rules to your lexer, so that you can produce
+tokens based on certain criteria. Both of these attributes are very similar (and share common configuration options)
+so they’re grouped here for easier reading.</p>
+<h5 id="tokenliteral-" class="section-header"><a href="#tokenliteral-"><code>#[token(&quot;LITERAL&quot;, ...)]</code></a></h5>
+<p>Produce this variant when the provided literal string is found.</p>
+<p>A <code>#[token(...)]</code> definition should be used for tokens that are represented <em>solely</em> by a specific piece of input,
+such as keywords or symbols. For example,</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">logos::Logos</span>;
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Logos</span>)]</span>
+<span class="kw">enum</span> <span class="ident">Token</span> {
+    <span class="attribute">#[<span class="ident">token</span>(<span class="string">&quot;if&quot;</span>)]</span>
+    <span class="ident">If</span>,
+    <span class="attribute">#[<span class="ident">token</span>(<span class="string">&quot;then&quot;</span>)]</span>
+    <span class="ident">Then</span>,
+    <span class="attribute">#[<span class="ident">token</span>(<span class="string">&quot;else&quot;</span>)]</span>
+    <span class="ident">Else</span>,
+    <span class="comment">// ... and so on. You can use any string you&#39;d like!</span>
+}</code></pre></div>
+<p>For tokens that may be represented by <em>any</em> input that fits a certain criteria (such as string literals or
+identifiers) you should use a <code>#[regex(...)]</code> definition instead.</p>
+<h5 id="regexpattern-" class="section-header"><a href="#regexpattern-"><code>#[regex(&quot;PATTERN&quot;, ...)]</code></a></h5>
+<p>Produce this variant when the provided regular expression matches.</p>
+<p>A <code>#[regex(...)]</code> definition should be used for tokens that are represented by <em>any</em> input that fits a certain
+criteria - such as integer literals, identifiers, and similar. Integer literals could be nearly <em>any</em> sequence of
+the numbers 0 through 9, and writing out every possible number using <code>#[token(...)]</code> definitions would be a
+<em>colossal</em> waste of time.</p>
+<p>We can use a <code>#[regex(...)]</code> definition for this instead, like so:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">logos::Logos</span>;
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Logos</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">enum</span> <span class="ident">Token</span> {
+    <span class="comment">// Callbacks are explained further below, but for now all you need to know is that we use the `logos::skip`</span>
+    <span class="comment">// callback here so that we can ignore whitespace.</span>
+    <span class="attribute">#[<span class="ident">regex</span>(<span class="string">r&quot;\s&quot;</span>, <span class="ident">logos::skip</span>)]</span>
+    <span class="ident">Whitespace</span>,
+
+    <span class="attribute">#[<span class="ident">regex</span>(<span class="string">r&quot;[1-9]+[0-9]*&quot;</span>)]</span>
+    <span class="ident">Integer</span>,
+    <span class="comment">// ... and so on. See below for more details on what you can and can&#39;t do.</span>
+}
+
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">lexer</span> <span class="op">=</span> <span class="ident">Token::lexer</span>(<span class="string">&quot;89 144 233&quot;</span>);
+
+<span class="ident">lexer</span>.<span class="ident">next</span>();
+<span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">slice</span>(), <span class="string">&quot;89&quot;</span>);
+
+<span class="ident">lexer</span>.<span class="ident">next</span>();
+<span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">slice</span>(), <span class="string">&quot;144&quot;</span>);
+
+<span class="ident">lexer</span>.<span class="ident">next</span>();
+<span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">slice</span>(), <span class="string">&quot;233&quot;</span>);
+
+<span class="comment">// We&#39;ve reached the end of our input, so calling `next` again returns `None`</span>
+<span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">next</span>(), <span class="prelude-val">None</span>);</code></pre></div>
+<p>The regular expression used within a <code>#[regex(...)]</code> definition is subject to some limitations. Most notably:</p>
+<ul>
+<li>Look-around is not supported</li>
+<li>Backreferences are not supported</li>
+<li>Line anchors may not be used</li>
+<li>Capture groups cannot be used to extract portions of the matched input.</li>
+</ul>
+<p>If you’d like to perform more complicated lexing, you can use <em>lexer callbacks</em>, which are described below and in
+the <a href="./callback/index.html">documentation on callbacks</a>.</p>
+<h5 id="callbacks" class="section-header"><a href="#callbacks">Callbacks</a></h5>
+<p>Callbacks may be attached to a <code>#[token(...)]</code> or <code>#[regex(...)]</code> definition, and are called whenever a match
+occurs. They can be used to put data into a variant, skip a token match, or to emit errors. Callbacks can also
+perform more complicated lexing if regular expressions are too limiting.</p>
+<p>Callbacks may be provided as closures, or as paths to functions defined elsewhere.
+They are typically passed as positional arguments to the <code>#[token(...)]</code> or <code>#[regex(...)]</code> attributes, like so:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">logos::Logos</span>;
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Logos</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">enum</span> <span class="ident">Token</span> {
+    <span class="comment">// We can use the predefined `skip` callback to ignore whitespace</span>
+    <span class="attribute">#[<span class="ident">regex</span>(<span class="string">r&quot;\s&quot;</span>, <span class="ident">logos::skip</span>)]</span>
+    <span class="ident">Whitespace</span>,
+
+    <span class="comment">// ... and we can also use a closure to put data into a variant</span>
+    <span class="attribute">#[<span class="ident">regex</span>(<span class="string">&quot;[0-9]+&quot;</span>, <span class="op">|</span><span class="ident">lex</span><span class="op">|</span> <span class="ident">lex</span>.<span class="ident">slice</span>().<span class="ident">parse</span>().<span class="ident">ok</span>())]</span>
+    <span class="ident">Integer</span>(<span class="ident">usize</span>)
+}
+
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">lexer</span> <span class="op">=</span> <span class="ident">Token::lexer</span>(<span class="string">&quot;2000 305 8&quot;</span>);
+
+<span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">Token::Integer</span>(<span class="number">2000</span>))));
+<span class="comment">// The whitespace between `2000` and `305` is skipped</span>
+<span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">Token::Integer</span>(<span class="number">305</span>))));
+<span class="comment">// The whitespace between `305` and `8` is skipped</span>
+<span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">Token::Integer</span>(<span class="number">8</span>))));
+<span class="comment">// We&#39;ve reached the end of our input, so the lexer returns `None`</span>
+<span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">next</span>(), <span class="prelude-val">None</span>);</code></pre></div>
+<p>Callbacks may also be passed using the <code>callback</code> option, which is described further in the section below.</p>
+<p>See the <a href="./callback/index.html">documentation on callbacks</a> for
+details not covered here.</p>
+<h5 id="other-options" class="section-header"><a href="#other-options">Other options</a></h5>
+<p>The <code>#[token(...)]</code> and <code>#[regex(...)]</code> attributes also support additional configuration options.</p>
+<p><strong>Additional options must come after the pattern and callback</strong>. For example, the following is invalid:</p>
+
+<div class='information'><div class='tooltip compile_fail'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered compile_fail"><code><span class="kw">use</span> <span class="ident">logos::Logos</span>;
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Logos</span>)]</span>
+<span class="kw">enum</span> <span class="ident">Token</span> {
+    <span class="attribute">#[<span class="ident">token</span>(<span class="ident">priority</span> <span class="op">=</span> <span class="number">20</span>, <span class="string">&quot;fast&quot;</span>)]</span>
+    <span class="ident">Fast</span>
+}</code></pre></div>
+<h6 id="priority--" class="section-header"><a href="#priority--"><code>priority = ...</code></a></h6>
+<p>Sets the priority of the definition. This argument’s value should be an integer.</p>
+<p>The priority value is used to disambiguate tokens, and is normally calculated automatically. Logos will issue a
+compiler error if any two definitions have the same priority and could match the same input, so this option can be
+used to solve conflicts in that scenario.</p>
+<p>For example, the following two definitions are in conflict:</p>
+
+<div class='information'><div class='tooltip compile_fail'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered compile_fail"><code><span class="kw">use</span> <span class="ident">logos::Logos</span>;
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Logos</span>)]</span>
+<span class="kw">enum</span> <span class="ident">Token</span> {
+    <span class="attribute">#[<span class="ident">token</span>(<span class="string">&quot;fast&quot;</span>)]</span>
+    <span class="ident">Fast</span>,
+
+    <span class="attribute">#[<span class="ident">regex</span>(<span class="string">&quot;(ridiculously)?fast(er|est)?&quot;</span>)]</span>
+    <span class="ident">RidiculouslyFast</span>,
+}</code></pre></div>
+<p>Both the <code>#[regex(&quot;(ridiculously)?fast[er|est]?&quot;)]</code> and <code>#[token(&quot;fast&quot;)]</code> definitions could match the input “fast”,
+and both have the same priority.</p>
+<p>When you encounter a conflict like this, Logos will also use the compile error to suggest a priority value that
+isn’t ambiguous. In this case, <code>fast</code> has a priority of 8, so Logos suggested that we use a priority of 9 to
+disambiguate:</p>
+<div class="example-wrap"><pre class="language-no_rust"><code>error: A definition of variant `RidiculouslyFast` can match the same input as another definition of variant `Fast`.
+
+       hint: Consider giving one definition a higher priority: #[regex(..., priority = 9)]
+  -&gt; src\example.rs:8:13
+  |
+5 |     #[regex(&quot;fast[er|est]?&quot;)]
+  |             ^^^^^^^^^^^^^^^
+
+error: A definition of variant `Fast` can match the same input as another definition of variant `RidiculouslyFast`.
+
+       hint: Consider giving one definition a higher priority: #[regex(..., priority = 9)]
+ --&gt; src\example.rs:8:13
+  |
+8 |     #[token(&quot;fast&quot;)]
+  |             ^^^^^^</code></pre></div>
+<p>You can then solve this conflict by using the <code>priority</code> option:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">logos::Logos</span>;
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Logos</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">enum</span> <span class="ident">Token</span> {
+    <span class="attribute">#[<span class="ident">regex</span>(<span class="string">r&quot;\s&quot;</span>, <span class="ident">logos::skip</span>)]</span>
+    <span class="ident">Whitespace</span>,
+
+    <span class="attribute">#[<span class="ident">token</span>(<span class="string">&quot;fast&quot;</span>, <span class="ident">priority</span> <span class="op">=</span> <span class="number">9</span>)]</span>
+    <span class="ident">Fast</span>,
+
+    <span class="attribute">#[<span class="ident">regex</span>(<span class="string">&quot;(ridiculously)?fast(er|est)?&quot;</span>)]</span>
+    <span class="ident">RidiculouslyFast</span>,
+}
+
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">lexer</span> <span class="op">=</span> <span class="ident">Token::lexer</span>(<span class="string">&quot;fast faster fastest ridiculouslyfast&quot;</span>);
+
+<span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">Token::Fast</span>)));
+<span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">slice</span>(), <span class="string">&quot;fast&quot;</span>);
+
+<span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">Token::RidiculouslyFast</span>)));
+<span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">slice</span>(), <span class="string">&quot;faster&quot;</span>);
+
+<span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">Token::RidiculouslyFast</span>)));
+<span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">slice</span>(), <span class="string">&quot;fastest&quot;</span>);
+
+<span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">Token::RidiculouslyFast</span>)));
+<span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">slice</span>(), <span class="string">&quot;ridiculouslyfast&quot;</span>);
+
+<span class="comment">// We&#39;ve reached the end of our input, so calling `next` again returns `None`</span>
+<span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">next</span>(), <span class="prelude-val">None</span>);</code></pre></div>
+<h6 id="callback--" class="section-header"><a href="#callback--"><code>callback = ...</code></a></h6>
+<p>Sets the callback attached to this definition. This argument’s value should be a closure or a path to a function
+defined elsewhere.</p>
+<p>For example,</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">logos::Logos</span>;
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Logos</span>)]</span>
+<span class="kw">enum</span> <span class="ident">Token</span> {
+    <span class="comment">// We can use the predefined `skip` callback to ignore whitespace</span>
+    <span class="attribute">#[<span class="ident">regex</span>(<span class="string">r&quot;\s&quot;</span>, <span class="ident">callback</span> <span class="op">=</span> <span class="ident">logos::skip</span>)]</span>
+    <span class="ident">Whitespace</span>,
+}</code></pre></div>
+<p><strong>Callbacks may also be passed as positional arguments</strong>, so you likely won’t find yourself needing to use the named
+form. See the section above and the <a href="./callback/index.html">documentation on callbacks</a> for details not covered
+here.</p>
+<h6 id="ignore" class="section-header"><a href="#ignore"><code>ignore(...)</code></a></h6>
+<p>Ignore certain aspects of the input when performing comparisons. This argument’s value should be a parenthesized
+sequence of flags.</p>
+<p>Valid flags are</p>
+<ul>
+<li><code>case</code> - Comparisons between characters will be entirely <strong>case-insensitive</strong>. This flag may not be used with
+<code>ascii_case</code>.</li>
+<li><code>ascii_case</code> - Comparisons between <strong>ASCII</strong> characters will be <strong>case-insensitive</strong>. This flag may not be used
+with <code>case</code>.</li>
+</ul>
+<p>For example:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">logos::Logos</span>;
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Logos</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">enum</span> <span class="ident">Token</span> {
+    <span class="attribute">#[<span class="ident">regex</span>(<span class="string">r&quot;\s&quot;</span>, <span class="ident">logos::skip</span>)]</span>
+    <span class="ident">Whitespace</span>,
+
+    <span class="attribute">#[<span class="ident">regex</span>(<span class="string">&quot;[a-z]+[0-9a-z]*&quot;</span>, <span class="ident">ignore</span>(<span class="ident">ascii_case</span>))]</span>
+    <span class="ident">Identifier</span>,
+}
+
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">lexer</span> <span class="op">=</span> <span class="ident">Token::lexer</span>(<span class="string">&quot;Case iS UNIMPORtant&quot;</span>);
+
+<span class="ident">lexer</span>.<span class="ident">next</span>();
+<span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">slice</span>(), <span class="string">&quot;Case&quot;</span>);
+
+<span class="ident">lexer</span>.<span class="ident">next</span>();
+<span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">slice</span>(), <span class="string">&quot;iS&quot;</span>);
+
+<span class="ident">lexer</span>.<span class="ident">next</span>();
+<span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">slice</span>(), <span class="string">&quot;UNIMPORtant&quot;</span>);
+
+<span class="comment">// We&#39;ve reached the end of our input, so calling `next` again returns `None`</span>
+<span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">next</span>(), <span class="prelude-val">None</span>);</code></pre></div>
+</div></details><h2 id="associated-types" class="small-section-header">Associated Types<a href="#associated-types" class="anchor"></a></h2><div class="methods"><details class="rustdoc-toggle" open><summary><div id="associatedtype.Extras" class="method has-srclink"><div class="rightside"><a class="srclink" href="../src/logos/lib.rs.html#620" title="goto source code">[src]</a></div><h4 class="code-header">type <a href="#associatedtype.Extras" class="associatedtype">Extras</a></h4></div></summary><div class="docblock"><p>The “extras” type, used to add state to a lexer.</p>
+<p>Occasionally you’d like to add extra information to a lexer; perhaps for the sake of debugging, or just to
+handle more complicated input. Logos allows you to insert this extra information into a lexer using a concept of
+“extras” - a value stored in the lexer that you can access within callbacks and modify as you wish.</p>
+<p>By default, Logos will just use the <code>()</code> type for extras. If you’d like to use a different type, you can use the
+derive macro’s <code>extras</code> option.</p>
+</div></details><details class="rustdoc-toggle" open><summary><div id="associatedtype.Source" class="method has-srclink"><div class="rightside"><a class="srclink" href="../src/logos/lib.rs.html#629" title="goto source code">[src]</a></div><h4 class="code-header">type <a href="#associatedtype.Source" class="associatedtype">Source</a>: <a class="trait" href="source/trait.Source.html" title="trait logos::source::Source">Source</a> + ?<a class="trait" href="https://doc.rust-lang.org/1.59.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a> + 'source</h4></div></summary><div class="docblock"><p>The source type that tokens are lexed from.</p>
+<p>This is <code>str</code> by default, but will be <code>[u8]</code> if you use a non-unicode byte string (or character class) within a
+<code>#[token(...)]</code> or <code>#[regex(...)]</code> definition.</p>
+<p>You can use your own source type by passing a type implementing the <a href="source/trait.Source.html" title="Source">Source</a> trait to the derive macro’s <code>source</code>
+option.</p>
+</div></details><details class="rustdoc-toggle" open><summary><div id="associatedtype.Error" class="method has-srclink"><div class="rightside"><a class="srclink" href="../src/logos/lib.rs.html#635" title="goto source code">[src]</a></div><h4 class="code-header">type <a href="#associatedtype.Error" class="associatedtype">Error</a>: <a class="trait" href="error/trait.Error.html" title="trait logos::error::Error">Error</a>&lt;'source, Self&gt;</h4></div></summary><div class="docblock"><p>The type used to report errors during lexing.</p>
+<p>This is <a href="error/struct.UnknownToken.html" title="UnknownToken">UnknownToken</a> by default, but you can use your own
+error type by passing a type implementing the <a href="error/trait.Error.html" title="Error">Error</a> trait to the derive macro’s <code>error</code> option.</p>
+</div></details></div><h2 id="required-methods" class="small-section-header">Required methods<a href="#required-methods" class="anchor"></a></h2><div class="methods"><details class="rustdoc-toggle" open><summary><div id="tymethod.lex" class="method has-srclink"><div class="rightside"><a class="srclink" href="../src/logos/lib.rs.html#641" title="goto source code">[src]</a></div><h4 class="code-header">fn <a href="#tymethod.lex" class="fnname">lex</a>(lexer: &amp;mut <a class="struct" href="struct.Lexer.html" title="struct logos::Lexer">Lexer</a>&lt;'source, Self&gt;)</h4></div></summary><div class="docblock"><p>The heart of Logos.</p>
+<p>This method is called during the lexing process, and is implemented by the <code>logos-derive</code> crate. As a reminder,
+you should <strong>never implement this trait yourself</strong>. Use the derive macro!</p>
+</div></details></div><h2 id="provided-methods" class="small-section-header">Provided methods<a href="#provided-methods" class="anchor"></a></h2><div class="methods"><details class="rustdoc-toggle" open><summary><div id="method.lexer" class="method has-srclink"><div class="rightside"><a class="srclink" href="../src/logos/lib.rs.html#644-649" title="goto source code">[src]</a></div><h4 class="code-header">fn <a href="#method.lexer" class="fnname">lexer</a>(source: &amp;'source Self::<a class="associatedtype" href="trait.Logos.html#associatedtype.Source" title="type logos::Logos::Source">Source</a>) -&gt; <a class="struct" href="struct.Lexer.html" title="struct logos::Lexer">Lexer</a>&lt;'source, Self&gt;<span class="notable-traits"><span class="notable-traits-tooltip">ⓘ<div class="notable-traits-tooltiptext"><span class="docblock"><div class="notable">Notable traits for <a class="struct" href="struct.Lexer.html" title="struct logos::Lexer">Lexer</a>&lt;'source, Token&gt;</div><code class="content"><span class="where fmt-newline">impl&lt;'source, Token&gt; <a class="trait" href="https://doc.rust-lang.org/1.59.0/core/iter/traits/iterator/trait.Iterator.html" title="trait core::iter::traits::iterator::Iterator">Iterator</a> for <a class="struct" href="struct.Lexer.html" title="struct logos::Lexer">Lexer</a>&lt;'source, Token&gt; <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;Token: <a class="trait" href="trait.Logos.html" title="trait logos::Logos">Logos</a>&lt;'source&gt;,&nbsp;</span></span><span class="where fmt-newline">    type <a href="https://doc.rust-lang.org/1.59.0/core/iter/traits/iterator/trait.Iterator.html#associatedtype.Item" class="associatedtype">Item</a> = <a class="enum" href="https://doc.rust-lang.org/1.59.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;Token, Token::<a class="associatedtype" href="trait.Logos.html#associatedtype.Error" title="type logos::Logos::Error">Error</a>&gt;;</span></code></span></div></span></span> <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;Self::<a class="associatedtype" href="trait.Logos.html#associatedtype.Extras" title="type logos::Logos::Extras">Extras</a>: <a class="trait" href="https://doc.rust-lang.org/1.59.0/core/default/trait.Default.html" title="trait core::default::Default">Default</a>,&nbsp;</span></h4></div></summary><div class="docblock"><p>Create a new <a href="struct.Lexer.html" title="Lexer">Lexer</a> for this token type.</p>
+</div></details><details class="rustdoc-toggle" open><summary><div id="method.lexer_with_extras" class="method has-srclink"><div class="rightside"><a class="srclink" href="../src/logos/lib.rs.html#657-662" title="goto source code">[src]</a></div><h4 class="code-header">fn <a href="#method.lexer_with_extras" class="fnname">lexer_with_extras</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;source: &amp;'source Self::<a class="associatedtype" href="trait.Logos.html#associatedtype.Source" title="type logos::Logos::Source">Source</a>, <br>&nbsp;&nbsp;&nbsp;&nbsp;extras: Self::<a class="associatedtype" href="trait.Logos.html#associatedtype.Extras" title="type logos::Logos::Extras">Extras</a><br>) -&gt; <a class="struct" href="struct.Lexer.html" title="struct logos::Lexer">Lexer</a>&lt;'source, Self&gt;<span class="notable-traits"><span class="notable-traits-tooltip">ⓘ<div class="notable-traits-tooltiptext"><span class="docblock"><div class="notable">Notable traits for <a class="struct" href="struct.Lexer.html" title="struct logos::Lexer">Lexer</a>&lt;'source, Token&gt;</div><code class="content"><span class="where fmt-newline">impl&lt;'source, Token&gt; <a class="trait" href="https://doc.rust-lang.org/1.59.0/core/iter/traits/iterator/trait.Iterator.html" title="trait core::iter::traits::iterator::Iterator">Iterator</a> for <a class="struct" href="struct.Lexer.html" title="struct logos::Lexer">Lexer</a>&lt;'source, Token&gt; <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;Token: <a class="trait" href="trait.Logos.html" title="trait logos::Logos">Logos</a>&lt;'source&gt;,&nbsp;</span></span><span class="where fmt-newline">    type <a href="https://doc.rust-lang.org/1.59.0/core/iter/traits/iterator/trait.Iterator.html#associatedtype.Item" class="associatedtype">Item</a> = <a class="enum" href="https://doc.rust-lang.org/1.59.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;Token, Token::<a class="associatedtype" href="trait.Logos.html#associatedtype.Error" title="type logos::Logos::Error">Error</a>&gt;;</span></code></span></div></span></span></h4></div></summary><div class="docblock"><p>Create a new <a href="struct.Lexer.html" title="Lexer">Lexer</a> for this token type, using the provided <code>extras</code> value.</p>
+<h5 id="note" class="section-header"><a href="#note">Note</a></h5>
+<p>In most cases, you can use <a href="trait.Logos.html#method.lexer" title="Logos::lexer">Logos::lexer</a> instead. You should only use this function if you need to set up your
+lexer in a way that doesn’t play nicely with the <a href="https://doc.rust-lang.org/1.59.0/core/default/trait.Default.html" title="Default">Default</a> trait.</p>
+</div></details></div><h2 id="implementors" class="small-section-header">Implementors<a href="#implementors" class="anchor"></a></h2><div class="item-list" id="implementors-list"></div><script type="text/javascript" src="../implementors/logos/trait.Logos.js" async></script></section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../" data-current-crate="logos" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0 (9d1b2106e 2022-02-23)" ></div>
+</body></html>

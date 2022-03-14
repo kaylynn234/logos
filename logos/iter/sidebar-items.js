@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["BoxedLexer","A boxed and type-erased lexer."],["Lookahead","An iterator with a `peek()` method that can look into the future."],["MapWithLexer","An iterator that maps each value to another, making use of the lexer in the process."]]});

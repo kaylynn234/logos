@@ -1,0 +1,190 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Logos"><meta name="keywords" content="rust, rustlang, rust-lang, logos"><title>logos - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../dark.css" disabled><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../storage.js"></script><script src="../crates.js"></script><script defer src="../main.js"></script>
+    <noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../favicon.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a class="sidebar-logo" href="../logos/index.html"><div class="logo-container"><img src="https:&#x2F;&#x2F;maciej.codes&#x2F;kosz&#x2F;logos.png" alt="logo"></div>
+        </a><h2 class="location">Crate logos</h2><div class="block version"><div class="narrow-helper"></div><p>Version 0.13.0</p></div><div class="sidebar-elems"><a id="all-types" href="all.html"><p>See all logos's items</p></a><div class="block items"><ul><li><a href="#modules">Modules</a></li><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#traits">Traits</a></li><li><a href="#functions">Functions</a></li><li><a href="#types">Type Definitions</a></li></ul></div><div id="sidebar-vars" data-name="logos" data-ty="mod" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../logos/index.html"><img src="https:&#x2F;&#x2F;maciej.codes&#x2F;kosz&#x2F;logos.png" alt="logo"></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><h1 class="fqn"><span class="in-band">Crate <a class="mod" href="#">logos</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/logos/lib.rs.html#1-794" title="goto source code">[src]</a></span></h1><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><img src="https://raw.githubusercontent.com/maciejhirsz/logos/master/logos.svg?sanitize=true" alt="Logos logo" width="250" align="right">
+<h2 id="logos" class="section-header"><a href="#logos">Logos</a></h2>
+<p><em>Create ridiculously fast lexers</em></p>
+<p>Logos has two goals:</p>
+<ul>
+<li>To make it easy for you to create a lexer, so that you can spend your time on more complex problems.</li>
+<li>To make that lexer faster than anything you’d write by hand.</li>
+</ul>
+<p>To achieve this, Logos:</p>
+<ul>
+<li>Combines all token definitions into a single <a href="https://en.wikipedia.org/wiki/Deterministic_finite_automaton">deterministic state machine</a>.</li>
+<li>Optimizes branches into <a href="https://en.wikipedia.org/wiki/Lookup_table">lookup tables</a> or <a href="https://en.wikipedia.org/wiki/Branch_table">jump tables</a>.</li>
+<li>Prevents <a href="https://en.wikipedia.org/wiki/ReDoS">backtracking</a> inside token definitions.</li>
+<li><a href="https://en.wikipedia.org/wiki/Loop_unrolling">Unwinds loops</a>, and batches reads to minimize bounds checking.</li>
+<li>Does all of that heavy lifting at compile time!</li>
+</ul>
+<h3 id="example" class="section-header"><a href="#example">Example</a></h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">logos::Logos</span>;
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Logos</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">enum</span> <span class="ident">Token</span> {
+    <span class="comment">// Tokens can be literal strings, of any length.</span>
+    <span class="attribute">#[<span class="ident">token</span>(<span class="string">&quot;fast&quot;</span>)]</span>
+    <span class="ident">Fast</span>,
+
+    <span class="attribute">#[<span class="ident">token</span>(<span class="string">&quot;.&quot;</span>)]</span>
+    <span class="ident">Period</span>,
+
+    <span class="comment">// Or regular expressions.</span>
+    <span class="attribute">#[<span class="ident">regex</span>(<span class="string">&quot;[a-zA-Z]+&quot;</span>)]</span>
+    <span class="ident">Text</span>,
+
+    <span class="comment">// We can also use this variant to define whitespace,</span>
+    <span class="comment">// or any other matches we wish to skip.</span>
+    <span class="attribute">#[<span class="ident">regex</span>(<span class="string">r&quot;[ \t\n\f]+&quot;</span>, <span class="ident">logos::skip</span>)]</span>
+    <span class="ident">Whitespace</span>,
+}
+
+<span class="kw">fn</span> <span class="ident">main</span>() {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">lex</span> <span class="op">=</span> <span class="ident">Token::lexer</span>(<span class="string">&quot;Create ridiculously fast lexers.&quot;</span>);
+
+    <span class="macro">assert_eq!</span>(<span class="ident">lex</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">Token::Text</span>)));
+    <span class="macro">assert_eq!</span>(<span class="ident">lex</span>.<span class="ident">span</span>(), <span class="number">0</span>..<span class="number">6</span>);
+    <span class="macro">assert_eq!</span>(<span class="ident">lex</span>.<span class="ident">slice</span>(), <span class="string">&quot;Create&quot;</span>);
+
+    <span class="macro">assert_eq!</span>(<span class="ident">lex</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">Token::Text</span>)));
+    <span class="macro">assert_eq!</span>(<span class="ident">lex</span>.<span class="ident">span</span>(), <span class="number">7</span>..<span class="number">19</span>);
+    <span class="macro">assert_eq!</span>(<span class="ident">lex</span>.<span class="ident">slice</span>(), <span class="string">&quot;ridiculously&quot;</span>);
+
+    <span class="macro">assert_eq!</span>(<span class="ident">lex</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">Token::Fast</span>)));
+    <span class="macro">assert_eq!</span>(<span class="ident">lex</span>.<span class="ident">span</span>(), <span class="number">20</span>..<span class="number">24</span>);
+    <span class="macro">assert_eq!</span>(<span class="ident">lex</span>.<span class="ident">slice</span>(), <span class="string">&quot;fast&quot;</span>);
+
+    <span class="macro">assert_eq!</span>(<span class="ident">lex</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">Token::Text</span>)));
+    <span class="macro">assert_eq!</span>(<span class="ident">lex</span>.<span class="ident">span</span>(), <span class="number">25</span>..<span class="number">31</span>);
+    <span class="macro">assert_eq!</span>(<span class="ident">lex</span>.<span class="ident">slice</span>(), <span class="string">&quot;lexers&quot;</span>);
+
+    <span class="macro">assert_eq!</span>(<span class="ident">lex</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">Token::Period</span>)));
+    <span class="macro">assert_eq!</span>(<span class="ident">lex</span>.<span class="ident">span</span>(), <span class="number">31</span>..<span class="number">32</span>);
+    <span class="macro">assert_eq!</span>(<span class="ident">lex</span>.<span class="ident">slice</span>(), <span class="string">&quot;.&quot;</span>);
+
+    <span class="macro">assert_eq!</span>(<span class="ident">lex</span>.<span class="ident">next</span>(), <span class="prelude-val">None</span>);
+}</code></pre></div>
+<h3 id="callbacks" class="section-header"><a href="#callbacks">Callbacks</a></h3>
+<p>Logos can also call arbitrary functions whenever a pattern is matched, which can be used to put data into a variant or
+perform more complicated lexing if regular expressions are too limiting.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">logos</span>::{<span class="ident">Logos</span>, <span class="ident">Lexer</span>};
+
+<span class="kw">fn</span> <span class="ident">kilo</span>(<span class="ident">lex</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Lexer</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="ident">lex</span>.<span class="ident">slice</span>();
+    <span class="kw">let</span> <span class="ident">n</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">slice</span>[..<span class="ident">slice</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>].<span class="ident">parse</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>; <span class="comment">// skip &#39;k&#39;</span>
+     
+    <span class="prelude-val">Some</span>(<span class="ident">n</span> <span class="op">*</span> <span class="number">1_000</span>)
+}
+
+<span class="kw">fn</span> <span class="ident">mega</span>(<span class="ident">lex</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Lexer</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="ident">lex</span>.<span class="ident">slice</span>();
+    <span class="kw">let</span> <span class="ident">n</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">slice</span>[..<span class="ident">slice</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>].<span class="ident">parse</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>; <span class="comment">// skip &#39;m&#39;</span>
+
+    <span class="prelude-val">Some</span>(<span class="ident">n</span> <span class="op">*</span> <span class="number">1_000_000</span>)
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Logos</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">enum</span> <span class="ident">Token</span> {
+    <span class="attribute">#[<span class="ident">regex</span>(<span class="string">r&quot;[ \t\n\f]+&quot;</span>, <span class="ident">logos::skip</span>)]</span>
+    <span class="ident">Whitespace</span>,
+
+    <span class="comment">// Callbacks can use closure syntax, or refer</span>
+    <span class="comment">// to a function defined elsewhere.</span>
+    <span class="comment">//</span>
+    <span class="comment">// Each pattern can have its own callback.</span>
+    <span class="attribute">#[<span class="ident">regex</span>(<span class="string">&quot;[0-9]+&quot;</span>, <span class="op">|</span><span class="ident">lex</span><span class="op">|</span> <span class="ident">lex</span>.<span class="ident">slice</span>().<span class="ident">parse</span>().<span class="ident">ok</span>())]</span>
+    <span class="attribute">#[<span class="ident">regex</span>(<span class="string">&quot;[0-9]+k&quot;</span>, <span class="ident">kilo</span>)]</span>
+    <span class="attribute">#[<span class="ident">regex</span>(<span class="string">&quot;[0-9]+m&quot;</span>, <span class="ident">mega</span>)]</span>
+    <span class="ident">Number</span>(<span class="ident">u64</span>),
+}
+
+<span class="kw">fn</span> <span class="ident">main</span>() {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">lex</span> <span class="op">=</span> <span class="ident">Token::lexer</span>(<span class="string">&quot;5 42k 75m&quot;</span>);
+
+    <span class="macro">assert_eq!</span>(<span class="ident">lex</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">Token::Number</span>(<span class="number">5</span>))));
+    <span class="macro">assert_eq!</span>(<span class="ident">lex</span>.<span class="ident">slice</span>(), <span class="string">&quot;5&quot;</span>);
+
+    <span class="macro">assert_eq!</span>(<span class="ident">lex</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">Token::Number</span>(<span class="number">42_000</span>))));
+    <span class="macro">assert_eq!</span>(<span class="ident">lex</span>.<span class="ident">slice</span>(), <span class="string">&quot;42k&quot;</span>);
+
+    <span class="macro">assert_eq!</span>(<span class="ident">lex</span>.<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">Token::Number</span>(<span class="number">75_000_000</span>))));
+    <span class="macro">assert_eq!</span>(<span class="ident">lex</span>.<span class="ident">slice</span>(), <span class="string">&quot;75m&quot;</span>);
+
+    <span class="macro">assert_eq!</span>(<span class="ident">lex</span>.<span class="ident">next</span>(), <span class="prelude-val">None</span>);
+}</code></pre></div>
+<p>Callbacks can return any value implementing the <a href="callback/trait.CallbackResult.html" title="crate::callback::CallbackResult">CallbackResult</a> trait. This trait is implemented already for <code>Option</code>,
+<code>Result</code>, <code>bool</code> and many more - see the <a href="./callback/index.html">documentation on callbacks</a> for more information.</p>
+<h3 id="token-disambiguation" class="section-header"><a href="#token-disambiguation">Token disambiguation</a></h3>
+<p>The rule of thumb is:</p>
+<ul>
+<li>Longer beats shorter.</li>
+<li>Specific beats generic.</li>
+</ul>
+<p>If any two patterns could match the same input, such as <code>fast</code> and <code>[a-zA-Z]+</code> from the example above, <strong>Logos will
+choose the longer and more specific pattern</strong>. In this case, that means that a string like “fast” will result in
+<code>Token::Fast</code> instead of <code>Token::Text</code>.</p>
+<p>This is done by comparing the <em>numeric priority</em> of each definition. This priority is calculated using a
+simple set of rules:</p>
+<ul>
+<li>A regex <em>character class</em> (like <code>[a-z]</code>) has a priority of 1.</li>
+<li>A byte of text has a priority of 2.</li>
+</ul>
+<p>The priority of a repetition or alternation is the priority of its <strong>shortest possible match</strong>. More specifically,</p>
+<ul>
+<li>The shortest possible match for patterns like <code>term*</code> and <code>term?</code> is an empty string.</li>
+<li>The shortest possible match for a pattern like <code>term+</code> is just <code>term</code>, since <code>+</code> matches <em>at least</em> once.</li>
+<li>The shortest possible match for an alternation is always the shortest alternative.</li>
+</ul>
+<p>For example,</p>
+<ul>
+<li><code>[a-zA-Z]+</code> has a priority of 1; the priority of <code>[a-zA-Z]</code> is 1, and the <code>+</code> quantifier doesn’t affect the shortest
+possible match.</li>
+<li><code>foobar</code> has a priority of 12; it’s 6 bytes, and each byte has a priority of 2.</li>
+<li><code>(foo|hello)(bar)?</code> has a priority of 6. <code>foo</code> is the shortest option in the alternation, with a priority of 6. The
+shortest possible match for <code>(bar)?</code> is an empty string, so it has a priority of 0.</li>
+</ul>
+<p>If two definitions have the same priority and might match the same input, you’ll receive a compile error! Logos will
+point out the problematic definitions, and ask you to manually specify a priority to fix the issue.</p>
+<p>For example, the patterns <code>[abc]+</code> and <code>[cde]+</code> both have a priority of 1, and will <em>both</em> match repeated <code>c</code>s. You can
+fix this ambiguity by changing the definition to <code>#[regex(&quot;[abc]+&quot;, priority = 2)]</code> within the derive macro. In this
+case, the definition using <code>&quot;[abc]+&quot;</code> now has a higher priority, so all sequences of <code>c</code> will match the <code>[abc]+</code>
+definition instead.</p>
+<h3 id="how-fast" class="section-header"><a href="#how-fast">How fast?</a></h3>
+<p>Ridiculously fast!</p>
+<div class="example-wrap"><pre class="language-norust"><code>test identifiers                        ... bench:         647 ns/iter (+/- 27) = 1204 MB/s
+test keywords_operators_and_punctuators ... bench:       2,054 ns/iter (+/- 78) = 1037 MB/s
+test strings                            ... bench:         553 ns/iter (+/- 34) = 1575 MB/s</code></pre></div><h4 id="what-about-the-changes-you-made" class="section-header"><a href="#what-about-the-changes-you-made">What about the changes you made?</a></h4>
+<p>I ran benchmarks on both this fork and the upstream repository, and rest assured that even <em>after</em> my changes, Logos is
+still just as fast. Hooray!</p>
+<h3 id="acknowledgements" class="section-header"><a href="#acknowledgements">Acknowledgements</a></h3>
+<ul>
+<li><a href="https://pedrors.pt/">Pedrors</a> for the <strong>Logos</strong> logo.</li>
+</ul>
+<h3 id="thank-you" class="section-header"><a href="#thank-you">Thank you</a></h3>
+<p>Logos is very much a labor of love, so consider <a href="https://github.com/sponsors/maciejhirsz">buying the <em>real</em> author a coffee</a>. ☕</p>
+<h3 id="license" class="section-header"><a href="#license">License</a></h3>
+<p>Logos is licensed under the terms of both the MIT license and the Apache License (Version 2.0), at your option.</p>
+<p>See <a href="LICENSE-APACHE">LICENSE-APACHE</a> and <a href="LICENSE-MIT">LICENSE-MIT</a> for details.</p>
+</div></details><h2 id="reexports" class="small-section-header"><a href="#reexports">Re-exports</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left import-item"><code>pub use crate::error::<a class="trait" href="error/trait.Error.html" title="trait logos::error::Error">Error</a>;</code></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left import-item"><code>pub use crate::error::<a class="struct" href="error/struct.UnknownToken.html" title="struct logos::error::UnknownToken">UnknownToken</a>;</code></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left import-item"><code>pub use crate::source::<a class="trait" href="source/trait.Source.html" title="trait logos::source::Source">Source</a>;</code></div><div class="item-right docblock-short"></div></div></div><h2 id="modules" class="small-section-header"><a href="#modules">Modules</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="mod" href="callback/index.html" title="logos::callback mod">callback</a></div><div class="item-right docblock-short"><p>Types and traits used within lexer callbacks.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="error/index.html" title="logos::error mod">error</a></div><div class="item-right docblock-short"><p>Types and traits for error handling in Logos.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="iter/index.html" title="logos::iter mod">iter</a></div><div class="item-right docblock-short"><p>Tools for working with lexers as iterators.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="source/index.html" title="logos::source mod">source</a></div><div class="item-right docblock-short"><p>Traits for reading from different input sources.</p>
+</div></div></div><h2 id="structs" class="small-section-header"><a href="#structs">Structs</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Lexer.html" title="logos::Lexer struct">Lexer</a></div><div class="item-right docblock-short"><p>A <code>Lexer</code> allows you to read through a source (a type implementing the <a href="source/trait.Source.html" title="Source">Source</a> trait, like a string
+slice) and produce tokens using the <a href="trait.Logos.html" title="Logos">Logos</a> trait. It’s important to note that you should <em>not</em> implement <a href="trait.Logos.html" title="Logos">Logos</a>
+yourself, and should always use the derive macro instead. See the <a href="trait.Logos.html" title="Logos">trait’s documentation</a> for more details.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Skip.html" title="logos::Skip struct">Skip</a></div><div class="item-right docblock-short"><p>Used within callbacks to instruct the lexer to skip a token match.</p>
+</div></div></div><h2 id="enums" class="small-section-header"><a href="#enums">Enums</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="enum" href="enum.Filter.html" title="logos::Filter enum">Filter</a></div><div class="item-right docblock-short"><p>A type that can be used within callbacks to either produce a field for a token or skip a token match.</p>
+</div></div></div><h2 id="traits" class="small-section-header"><a href="#traits">Traits</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.LexerExt.html" title="logos::LexerExt trait">LexerExt</a></div><div class="item-right docblock-short"><p>Extension methods for types that contain a <a href="struct.Lexer.html" title="Lexer">Lexer</a>.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.Logos.html" title="logos::Logos trait">Logos</a></div><div class="item-right docblock-short"><p>Types that can be lexed using <a href="struct.Lexer.html" title="Lexer">Lexer</a>.</p>
+</div></div></div><h2 id="functions" class="small-section-header"><a href="#functions">Functions</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.skip.html" title="logos::skip fn">skip</a></div><div class="item-right docblock-short"><p>A predefined callback that unconditionally skips a token match.</p>
+</div></div></div><h2 id="types" class="small-section-header"><a href="#types">Type Definitions</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="type" href="type.Span.html" title="logos::Span type">Span</a></div><div class="item-right docblock-short"><p>A byte range in the source.</p>
+</div></div></div><h2 id="derives" class="small-section-header"><a href="#derives">Derive Macros</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="derive" href="derive.Logos.html" title="logos::Logos derive">Logos</a></div><div class="item-right docblock-short"></div></div></div></section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../" data-current-crate="logos" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0 (9d1b2106e 2022-02-23)" ></div>
+</body></html>

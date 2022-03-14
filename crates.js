@@ -1,0 +1,1 @@
+window.ALL_CRATES = ["logos","logos_derive","tests"];

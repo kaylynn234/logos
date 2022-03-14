@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["Chunk","A fixed, statically sized chunk of data that can be read from a `Source`."],["Source","Types the `Lexer` can read from."]]});
