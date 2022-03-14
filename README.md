@@ -27,7 +27,7 @@ To be more specific, the changes I've made stem from a couple gripes that I ran 
 - I don't like the options available at present for emitting errors within callbacks.
 - I think some of the documentation could be improved, or otherwise made a bit clearer.
 - "looking ahead" with Logos is currently very frustrating. `Peekable<I>` doesn't allow any access to the internal
-  operator, so accessing fields of the lexer (such as `source`) becomes impossible. 
+  iterator, so accessing fields of the lexer (such as `source`) becomes impossible. 
 
 ## What about the changes you made?
 
